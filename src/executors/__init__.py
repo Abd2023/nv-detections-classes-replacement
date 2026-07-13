@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from src.executors.package_init_placeholder_executor import PackageInitPlaceholderExecutor
+from src.executors.detections_classes_replacement_executor import (
+    DetectionsClassesReplacementExecutor,
+)
 
 
 EXECUTORS = {
-    "PackageInitPlaceholderExecutor": PackageInitPlaceholderExecutor,
+    "DetectionsClassesReplacementExecutor": DetectionsClassesReplacementExecutor,
 }
 
-__all__ = ["EXECUTORS", "PackageInitPlaceholderExecutor"]
-
+__all__ = ["DetectionsClassesReplacementExecutor", "EXECUTORS"]
