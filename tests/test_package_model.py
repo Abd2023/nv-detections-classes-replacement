@@ -1,0 +1,124 @@
+from typing import get_args
+
+from src.models import (
+    ClassificationPredictions,
+    DetectionPrediction,
+    DetectionsClassesReplacementRequest,
+    DetectionsClassesReplacementResponse,
+    MatchingMode,
+    PackageModel,
+    Predictions,
+)
+from src.models.PackageModel import PackageModel as SuitePackageModel
+
+
+def model_fields(model_class):
+    if hasattr(model_class, "model_fields"):
+        return model_class.model_fields
+    return model_class.__fields__
+
+
+def model_to_dict(model, *, by_alias=False):
+    if hasattr(model, "model_dump"):
+        return model.model_dump(by_alias=by_alias)
+    return model.dict(by_alias=by_alias)
+
+
+def parse_model(model_class, value):
+    if hasattr(model_class, "model_validate"):
+        return model_class.model_validate(value)
+    return model_class.parse_obj(value)
+
+
+def test_package_model_imports_and_uses_component_type():
+    package = PackageModel()
+
+    assert SuitePackageModel is PackageModel
+    assert package.name == "DetectionsClassesReplacement"
+    assert package.type == "component"
+    assert package.configs.executor.value.name == "DetectionsClassesReplacementExecutor"
+
+
+def test_request_defaults_define_inputs_and_configs():
+    request = DetectionsClassesReplacementRequest()
+
+    assert request.name == "DetectionsClassesReplacementExecutor"
+    assert request.type == "Request"
+    assert request.inputs.object_detection_predictions.value == []
+    assert request.inputs.object_detection_predictions.type == "Detections"
+    assert request.inputs.classification_predictions.value == []
+    assert request.configs.matching_mode.value.name == "Auto"
+    assert request.configs.fallback_class_name.value == ""
+    assert request.configs.fallback_class_id.value == -1
+
+
+def test_matching_mode_exposes_three_options():
+    options = get_args(model_fields(MatchingMode)["value"].annotation)
+
+    assert {option.__name__ for option in options} == {
+        "AutoMatchingModeOption",
+        "ParentIdOnlyMatchingModeOption",
+        "PositionalOnlyMatchingModeOption",
+    }
+
+
+def test_detection_prediction_supports_roboflow_style_fields():
+    detection = parse_model(
+        DetectionPrediction,
+        {
+            "detection_id": "det-1",
+            "x": 100.0,
+            "y": 80.0,
+            "width": 40.0,
+            "height": 30.0,
+            "confidence": 0.75,
+            "class": "vehicle",
+            "class_id": 1,
+            "metadata": {"source": "detector"},
+        },
+    )
+
+    serialized = model_to_dict(detection, by_alias=True)
+
+    assert detection.detection_id == "det-1"
+    assert detection.class_name == "vehicle"
+    assert serialized["class"] == "vehicle"
+    assert serialized["metadata"] == {"source": "detector"}
+
+
+def test_classification_predictions_accept_dicts_strings_and_string_lists():
+    predictions = ClassificationPredictions(
+        value=[
+            {"parent_id": "det-1", "top": "truck", "confidence": 0.91, "class_id": 7},
+            "bus",
+            ["plate-123", "plate-124"],
+        ]
+    )
+
+    assert predictions.type == "list"
+    assert predictions.value[0]["parent_id"] == "det-1"
+    assert predictions.value[1] == "bus"
+    assert predictions.value[2] == ["plate-123", "plate-124"]
+
+
+def test_response_outputs_predictions():
+    detection = DetectionPrediction(
+        detection_id="new-det-1",
+        x=100.0,
+        y=80.0,
+        width=40.0,
+        height=30.0,
+        confidence=0.91,
+        class_name="truck",
+        class_id=7,
+        metadata={"original_detection_id": "det-1"},
+    )
+    response = DetectionsClassesReplacementResponse(
+        outputs={"Predictions": Predictions(value=[detection])}
+    )
+
+    assert response.name == "DetectionsClassesReplacementExecutor"
+    assert response.type == "Response"
+    assert len(response.outputs.predictions.value) == 1
+    assert response.outputs.predictions.value[0].class_name == "truck"
+
