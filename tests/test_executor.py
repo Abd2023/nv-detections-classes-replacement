@@ -11,14 +11,35 @@ from src.models.package_model import FallbackClassId, MatchingMode
 
 
 def run_executor(*, detections, classifications, configs=None):
+    response = run_response(
+        detections=detections,
+        classifications=classifications,
+        configs=configs,
+    )
+    return response.outputs.predictions.value
+
+
+def run_response(*, detections, classifications, configs=None, images=None):
     request = DetectionsClassesReplacementRequest(
         inputs={
+            "inputImage": {"value": images or []},
             "inputDetections": {"value": detections},
             "inputData": {"value": classifications},
         },
         configs=configs or {},
     )
-    return DetectionsClassesReplacementExecutor(request).run().outputs.predictions.value
+    return DetectionsClassesReplacementExecutor(request).run()
+
+
+def test_image_input_is_passed_through_to_image_output():
+    response = run_response(
+        images=[{"uID": "image-1", "mime": "image/png"}],
+        detections=[],
+        classifications=[],
+    )
+
+    assert response.outputs.outputImages.name == "outputImages"
+    assert response.outputs.output_images.value == [{"uID": "image-1", "mime": "image/png"}]
 
 
 def test_parent_id_replacement_uses_single_label_top():

@@ -10,6 +10,7 @@ from ..models import (
     DetectionsClassesReplacementOutputs,
     DetectionsClassesReplacementRequest,
     DetectionsClassesReplacementResponse,
+    OutputImages,
     Predictions,
 )
 
@@ -26,6 +27,7 @@ class DetectionsClassesReplacementExecutor:
         return {"executor": "DetectionsClassesReplacementExecutor", "status": "ready"}
 
     def run(self) -> DetectionsClassesReplacementResponse:
+        input_images = self.request.inputs.inputImage.value
         detections = self.request.inputs.inputDetections.value
         classifications = self.request.inputs.inputData.value
         matching_mode = self.request.configs.matching_mode.value.name
@@ -59,6 +61,7 @@ class DetectionsClassesReplacementExecutor:
 
         return DetectionsClassesReplacementResponse(
             outputs=DetectionsClassesReplacementOutputs(
+                outputImages=OutputImages(value=input_images),
                 outputDetections=Predictions(value=updated_detections)
             )
         )
