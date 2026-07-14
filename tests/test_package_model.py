@@ -1,5 +1,7 @@
 from typing import get_args
 
+import importlib
+
 from src.models import (
     ClassificationPredictions,
     DetectionPrediction,
@@ -38,6 +40,17 @@ def test_package_model_imports_and_uses_component_type():
     assert package.name == "DetectionsClassesReplacement"
     assert package.type == "component"
     assert package.configs.executor.value.name == "DetectionsClassesReplacementExecutor"
+
+
+def test_suite_compatibility_module_exports_socket_classes():
+    suite_module = importlib.import_module("src.models.PackageModel")
+
+    assert suite_module.PackageModel is PackageModel
+    assert suite_module.InputImage.__name__ == "InputImage"
+    assert suite_module.ObjectDetectionPredictions.__name__ == "ObjectDetectionPredictions"
+    assert suite_module.ClassificationPredictions.__name__ == "ClassificationPredictions"
+    assert suite_module.OutputImages.__name__ == "OutputImages"
+    assert suite_module.Predictions.__name__ == "Predictions"
 
 
 def test_request_defaults_define_inputs_and_configs():
