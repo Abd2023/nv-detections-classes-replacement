@@ -64,6 +64,8 @@ def test_request_defaults_define_inputs_and_configs():
     assert request.inputs.inputImage.field == "input"
     assert request.inputs.inputDetections.field == "input"
     assert request.inputs.inputData.field == "input"
+    assert request.inputs.field == "input"
+    assert request.inputs.type == "object"
     assert request.inputs.input_image.value == []
     assert request.inputs.input_image.type == "Images"
     assert request.inputs.object_detection_predictions.value == []
@@ -146,8 +148,12 @@ def test_response_outputs_predictions():
     assert response.name == "DetectionsClassesReplacementExecutor"
     assert response.type == "Response"
     assert response.outputs.outputImages.name == "outputImages"
+    assert response.outputs.outputImages.field == "data"
     assert response.outputs.output_images.value == [{"uID": "image-1"}]
     assert response.outputs.outputDetections.name == "outputDetections"
+    assert response.outputs.outputDetections.field == "data"
+    assert response.outputs.field == "output"
+    assert response.outputs.type == "object"
     assert len(response.outputs.predictions.value) == 1
     assert response.outputs.predictions.value[0].class_name == "truck"
 
@@ -159,14 +165,12 @@ def test_request_and_response_serialize_with_canvas_socket_names():
     request_payload = model_to_dict(request, by_alias=True)
     response_payload = model_to_dict(response, by_alias=True)
 
-    assert sorted(request_payload["inputs"]) == [
-        "inputData",
-        "inputDetections",
-        "inputImage",
-    ]
+    assert {"inputData", "inputDetections", "inputImage"}.issubset(request_payload["inputs"])
     assert request_payload["inputs"]["inputImage"]["name"] == "inputImage"
     assert request_payload["inputs"]["inputDetections"]["name"] == "inputDetections"
     assert request_payload["inputs"]["inputData"]["name"] == "inputData"
-    assert sorted(response_payload["outputs"]) == ["outputDetections", "outputImages"]
+    assert request_payload["inputs"]["field"] == "input"
+    assert {"outputDetections", "outputImages"}.issubset(response_payload["outputs"])
     assert response_payload["outputs"]["outputImages"]["name"] == "outputImages"
     assert response_payload["outputs"]["outputDetections"]["name"] == "outputDetections"
+    assert response_payload["outputs"]["field"] == "output"
