@@ -2,7 +2,7 @@
   "name": "DetectionsClassesReplacementExecutor",
   "type": "Request",
   "inputs": {
-    "ObjectDetectionPredictions": {
+    "inputDetections": {
       "value": [
         {
           "detection_id": "det-vehicle-1",
@@ -32,7 +32,7 @@
         }
       ]
     },
-    "ClassificationPredictions": {
+    "inputClassificationPredictions": {
       "value": [
         {
           "parent_id": "det-vehicle-1",
@@ -75,4 +75,3 @@
     }
   }
 }
-

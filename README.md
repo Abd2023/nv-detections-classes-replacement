@@ -67,7 +67,7 @@ service.py
 
 ## Inputs
 
-### `ObjectDetectionPredictions`
+### `inputDetections`
 
 List of detection dictionaries.
 
@@ -89,9 +89,9 @@ Expected detection fields:
 }
 ```
 
-### `ClassificationPredictions`
+### `inputClassificationPredictions`
 
-List of classification results. The executor supports:
+List of classification results. It is exposed as a `Detections` socket so it can be connected on the NovaVision canvas. The executor supports:
 
 - dictionaries linked with `parent_id`
 - single-label classification dictionaries with `top`
@@ -154,7 +154,7 @@ Only used when `FallbackClassName` is set. If the value is negative, the executo
 
 ## Output
 
-### `Predictions`
+### `outputDetections`
 
 List of updated detection dictionaries.
 
@@ -218,7 +218,7 @@ python -m pytest
 Expected result:
 
 ```text
-14 passed
+15 passed
 ```
 
 With clean virtual environment:
@@ -339,4 +339,12 @@ feature branch -> develop -> main
 ## Notes
 
 Local Pydantic v2 may print warnings about v1-style `class Config` keys. The package keeps this metadata intentionally because NovaVision package model examples and prior Suite compatibility work use Pydantic `class Config` metadata for titles and schema targets.
+
+NovaVision canvas socket names are intentionally lower-camel-case:
+
+- `inputDetections`
+- `inputClassificationPredictions`
+- `outputDetections`
+
+Using names such as `ObjectDetectionPredictions` in the visible package model can prevent the Suite flow builder from rendering input/output ports.
 

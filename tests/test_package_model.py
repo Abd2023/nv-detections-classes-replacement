@@ -44,6 +44,8 @@ def test_request_defaults_define_inputs_and_configs():
 
     assert request.name == "DetectionsClassesReplacementExecutor"
     assert request.type == "Request"
+    assert request.inputs.input_detections.name == "inputDetections"
+    assert request.inputs.input_classification_predictions.name == "inputClassificationPredictions"
     assert request.inputs.object_detection_predictions.value == []
     assert request.inputs.object_detection_predictions.type == "Detections"
     assert request.inputs.classification_predictions.value == []
@@ -95,7 +97,8 @@ def test_classification_predictions_accept_dicts_strings_and_string_lists():
         ]
     )
 
-    assert predictions.type == "list"
+    assert predictions.name == "inputClassificationPredictions"
+    assert predictions.type == "Detections"
     assert predictions.value[0]["parent_id"] == "det-1"
     assert predictions.value[1] == "bus"
     assert predictions.value[2] == ["plate-123", "plate-124"]
@@ -119,6 +122,26 @@ def test_response_outputs_predictions():
 
     assert response.name == "DetectionsClassesReplacementExecutor"
     assert response.type == "Response"
+    assert response.outputs.output_detections.name == "outputDetections"
     assert len(response.outputs.predictions.value) == 1
     assert response.outputs.predictions.value[0].class_name == "truck"
 
+
+def test_request_and_response_serialize_with_canvas_socket_names():
+    request = DetectionsClassesReplacementRequest()
+    response = DetectionsClassesReplacementResponse()
+
+    request_payload = model_to_dict(request, by_alias=True)
+    response_payload = model_to_dict(response, by_alias=True)
+
+    assert sorted(request_payload["inputs"]) == [
+        "inputClassificationPredictions",
+        "inputDetections",
+    ]
+    assert request_payload["inputs"]["inputDetections"]["name"] == "inputDetections"
+    assert (
+        request_payload["inputs"]["inputClassificationPredictions"]["name"]
+        == "inputClassificationPredictions"
+    )
+    assert sorted(response_payload["outputs"]) == ["outputDetections"]
+    assert response_payload["outputs"]["outputDetections"]["name"] == "outputDetections"
