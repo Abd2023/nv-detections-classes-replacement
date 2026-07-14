@@ -346,8 +346,20 @@ class DetectionsClassesReplacementExecutorOption(NovaVisionExecutor):
         DetectionsClassesReplacementRequest,
         DetectionsClassesReplacementResponse,
     ] = Field(default_factory=DetectionsClassesReplacementRequest)
-    type: Literal["Executor"] = "Executor"
-    field: Literal["option"] = "option"
+    type: Literal["DetectionsClassesReplacementExecutor"] = "DetectionsClassesReplacementExecutor"
+    field: Literal["executor"] = "executor"
+
+    @root_validator(pre=True)
+    def map_legacy_executor_metadata(cls, values):
+        if not isinstance(values, dict):
+            return values
+
+        values = dict(values)
+        if values.get("type") == "Executor":
+            values["type"] = "DetectionsClassesReplacementExecutor"
+        if values.get("field") == "option":
+            values["field"] = "executor"
+        return values
 
     class Config:
         extra = "forbid"
@@ -359,18 +371,32 @@ class DetectionsClassesReplacementExecutorOption(NovaVisionExecutor):
 
 
 class ConfigExecutor(NovaVisionExecutor):
-    name: Literal["Executor"] = "Executor"
+    name: Literal["executor"] = "executor"
     value: DetectionsClassesReplacementExecutorOption = Field(
         default_factory=DetectionsClassesReplacementExecutorOption
     )
-    type: Literal["Executor"] = "Executor"
-    field: Literal["option"] = "option"
+    type: Literal["executor"] = "executor"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    @root_validator(pre=True)
+    def map_legacy_selector_metadata(cls, values):
+        if not isinstance(values, dict):
+            return values
+
+        values = dict(values)
+        if values.get("name") in {"Executor", "ConfigExecutor"}:
+            values["name"] = "executor"
+        if values.get("type") == "Executor":
+            values["type"] = "executor"
+        if values.get("field") == "option":
+            values["field"] = "dependentDropdownlist"
+        return values
 
     class Config:
         extra = "forbid"
         allow_population_by_field_name = True
         populate_by_name = True
-        title = "Executor"
+        title = "Task"
         schema_extra = {"target": "value"}
         json_schema_extra = {"target": "value"}
 
@@ -387,10 +413,40 @@ class PackageConfigs(NovaVisionConfigs):
 class PackageModel(NovaVisionPackage):
     name: Literal["DetectionsClassesReplacement"] = "DetectionsClassesReplacement"
     type: Literal["component"] = "component"
-    configs: PackageConfigs = Field(default_factory=PackageConfigs)
+    executor: ConfigExecutor = Field(default_factory=ConfigExecutor)
+    field: Literal["executor"] = "executor"
+
+    @root_validator(pre=True)
+    def map_legacy_package_configs(cls, values):
+        if not isinstance(values, dict):
+            return values
+
+        values = dict(values)
+        if "Executor" in values and "executor" not in values:
+            values["executor"] = values["Executor"]
+
+        configs = values.get("configs")
+        if configs is not None and "executor" not in values:
+            if isinstance(configs, PackageConfigs):
+                values["executor"] = configs.executor
+            elif isinstance(configs, dict):
+                if "Executor" in configs:
+                    values["executor"] = configs["Executor"]
+                elif "executor" in configs:
+                    values["executor"] = configs["executor"]
+
+        values.pop("Executor", None)
+        values.pop("configs", None)
+        return values
+
+    @property
+    def configs(self) -> PackageConfigs:
+        return PackageConfigs(Executor=self.executor)
 
     class Config:
         extra = "forbid"
         allow_population_by_field_name = True
         populate_by_name = True
         title = "Detections Classes Replacement"
+        schema_extra = {"target": "executor"}
+        json_schema_extra = {"target": "executor"}
