@@ -32,7 +32,7 @@
         }
       ]
     },
-    "inputClassificationPredictions": {
+    "inputData": {
       "value": [
         {
           "parent_id": "det-vehicle-1",
