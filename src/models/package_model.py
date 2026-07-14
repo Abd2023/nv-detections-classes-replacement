@@ -50,6 +50,19 @@ class DetectionPrediction(NovaVisionModel):
 ClassificationPredictionValue = Union[Dict[str, Any], str, List[str]]
 
 
+class InputImage(NovaVisionParam):
+    name: Literal["inputImage"] = "inputImage"
+    value: Any = Field(default_factory=list)
+    type: Literal["Images"] = "Images"
+    field: Literal["input"] = "input"
+
+    class Config:
+        extra = "forbid"
+        allow_population_by_field_name = True
+        populate_by_name = True
+        title = "Input Image"
+
+
 class ObjectDetectionPredictions(NovaVisionParam):
     name: Literal["inputDetections"] = "inputDetections"
     value: List[DetectionPrediction] = Field(default_factory=list)
@@ -74,6 +87,18 @@ class ClassificationPredictions(NovaVisionParam):
         allow_population_by_field_name = True
         populate_by_name = True
         title = "Classification Predictions"
+
+
+class OutputImages(NovaVisionParam):
+    name: Literal["outputImages"] = "outputImages"
+    value: Any = Field(default_factory=list)
+    type: Literal["Images"] = "Images"
+
+    class Config:
+        extra = "forbid"
+        allow_population_by_field_name = True
+        populate_by_name = True
+        title = "Output Images"
 
 
 class Predictions(NovaVisionParam):
@@ -171,6 +196,7 @@ class FallbackClassId(NovaVisionParam):
 
 
 class DetectionsClassesReplacementInputs(NovaVisionInputs):
+    inputImage: InputImage = Field(default_factory=InputImage)
     inputDetections: ObjectDetectionPredictions = Field(default_factory=ObjectDetectionPredictions)
     inputData: ClassificationPredictions = Field(default_factory=ClassificationPredictions)
 
@@ -180,16 +206,23 @@ class DetectionsClassesReplacementInputs(NovaVisionInputs):
             return values
 
         values = dict(values)
+        if "InputImage" in values and "inputImage" not in values:
+            values["inputImage"] = values["InputImage"]
         if "ObjectDetectionPredictions" in values and "inputDetections" not in values:
             values["inputDetections"] = values["ObjectDetectionPredictions"]
         if "ClassificationPredictions" in values and "inputData" not in values:
             values["inputData"] = values["ClassificationPredictions"]
         if "inputClassificationPredictions" in values and "inputData" not in values:
             values["inputData"] = values["inputClassificationPredictions"]
+        values.pop("InputImage", None)
         values.pop("ObjectDetectionPredictions", None)
         values.pop("ClassificationPredictions", None)
         values.pop("inputClassificationPredictions", None)
         return values
+
+    @property
+    def input_image(self) -> InputImage:
+        return self.inputImage
 
     @property
     def object_detection_predictions(self) -> ObjectDetectionPredictions:
@@ -231,6 +264,7 @@ class DetectionsClassesReplacementConfigs(NovaVisionConfigs):
 
 
 class DetectionsClassesReplacementOutputs(NovaVisionOutputs):
+    outputImages: OutputImages = Field(default_factory=OutputImages)
     outputDetections: Predictions = Field(default_factory=Predictions)
 
     @root_validator(pre=True)
@@ -239,10 +273,17 @@ class DetectionsClassesReplacementOutputs(NovaVisionOutputs):
             return values
 
         values = dict(values)
+        if "OutputImages" in values and "outputImages" not in values:
+            values["outputImages"] = values["OutputImages"]
         if "Predictions" in values and "outputDetections" not in values:
             values["outputDetections"] = values["Predictions"]
+        values.pop("OutputImages", None)
         values.pop("Predictions", None)
         return values
+
+    @property
+    def output_images(self) -> OutputImages:
+        return self.outputImages
 
     @property
     def predictions(self) -> Predictions:
