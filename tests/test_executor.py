@@ -13,8 +13,8 @@ from src.models.package_model import FallbackClassId, MatchingMode
 def run_executor(*, detections, classifications, configs=None):
     request = DetectionsClassesReplacementRequest(
         inputs={
-            "ObjectDetectionPredictions": {"value": detections},
-            "ClassificationPredictions": {"value": classifications},
+            "inputDetections": {"value": detections},
+            "inputClassificationPredictions": {"value": classifications},
         },
         configs=configs or {},
     )
@@ -242,4 +242,3 @@ def test_parent_id_only_does_not_fallback_to_position():
     )
 
     assert outputs == []
-
