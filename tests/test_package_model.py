@@ -33,13 +33,33 @@ def parse_model(model_class, value):
     return model_class.parse_obj(value)
 
 
+def model_schema(model_class):
+    if hasattr(model_class, "model_json_schema"):
+        return model_class.model_json_schema()
+    return model_class.schema()
+
+
 def test_package_model_imports_and_uses_component_type():
     package = PackageModel()
 
     assert SuitePackageModel is PackageModel
     assert package.name == "DetectionsClassesReplacement"
     assert package.type == "component"
+    assert package.executor.name == "executor"
+    assert package.executor.type == "executor"
+    assert package.executor.field == "dependentDropdownlist"
+    assert package.executor.value.name == "DetectionsClassesReplacementExecutor"
+    assert package.executor.value.field == "executor"
     assert package.configs.executor.value.name == "DetectionsClassesReplacementExecutor"
+
+
+def test_package_model_root_targets_executor_for_suite_form_renderer():
+    schema = model_schema(PackageModel)
+
+    assert schema["target"] == "executor"
+    assert {"executor", "field"}.issubset(schema["properties"])
+    assert "configs" not in schema["properties"]
+    assert PackageModel(configs={"Executor": {}}).executor.name == "executor"
 
 
 def test_suite_compatibility_module_exports_socket_classes():
