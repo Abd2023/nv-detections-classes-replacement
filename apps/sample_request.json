@@ -1,0 +1,78 @@
+{
+  "name": "DetectionsClassesReplacementExecutor",
+  "type": "Request",
+  "inputs": {
+    "ObjectDetectionPredictions": {
+      "value": [
+        {
+          "detection_id": "det-vehicle-1",
+          "x": 120.0,
+          "y": 80.0,
+          "width": 64.0,
+          "height": 40.0,
+          "confidence": 0.82,
+          "class": "vehicle",
+          "class_id": 1,
+          "metadata": {
+            "source": "generic-detector"
+          }
+        },
+        {
+          "detection_id": "det-animal-1",
+          "x": 260.0,
+          "y": 140.0,
+          "width": 72.0,
+          "height": 58.0,
+          "confidence": 0.76,
+          "class": "animal",
+          "class_id": 2,
+          "metadata": {
+            "source": "generic-detector"
+          }
+        }
+      ]
+    },
+    "ClassificationPredictions": {
+      "value": [
+        {
+          "parent_id": "det-vehicle-1",
+          "top": "truck",
+          "class_id": 7,
+          "confidence": 0.94
+        },
+        {
+          "parent_id": "det-animal-1",
+          "predictions": [
+            {
+              "class": "cat",
+              "class_id": 12,
+              "confidence": 0.21
+            },
+            {
+              "class": "golden_retriever",
+              "class_id": 18,
+              "confidence": 0.89
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "configs": {
+    "MatchingMode": {
+      "value": {
+        "name": "Auto",
+        "value": 1,
+        "type": "string",
+        "field": "option"
+      }
+    },
+    "FallbackClassName": {
+      "value": ""
+    },
+    "FallbackClassId": {
+      "value": -1
+    }
+  }
+}
+
