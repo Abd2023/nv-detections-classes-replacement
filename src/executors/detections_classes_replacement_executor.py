@@ -26,8 +26,8 @@ class DetectionsClassesReplacementExecutor:
         return {"executor": "DetectionsClassesReplacementExecutor", "status": "ready"}
 
     def run(self) -> DetectionsClassesReplacementResponse:
-        detections = self.request.inputs.input_detections.value
-        classifications = self.request.inputs.input_classification_predictions.value
+        detections = self.request.inputs.inputDetections.value
+        classifications = self.request.inputs.inputData.value
         matching_mode = self.request.configs.matching_mode.value.name
         fallback_class_name = self.request.configs.fallback_class_name.value
         fallback_class_id = self.request.configs.fallback_class_id.value
@@ -59,7 +59,7 @@ class DetectionsClassesReplacementExecutor:
 
         return DetectionsClassesReplacementResponse(
             outputs=DetectionsClassesReplacementOutputs(
-                output_detections=Predictions(value=updated_detections)
+                outputDetections=Predictions(value=updated_detections)
             )
         )
 
