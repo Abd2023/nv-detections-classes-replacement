@@ -19,11 +19,13 @@ For example, a detector may output a generic `vehicle` detection with a bounding
 
 The component receives:
 
+- image data passed through from the upstream image flow
 - object detection predictions with bounding boxes and generic class labels
 - classification predictions from cropped detections
 
 It returns:
 
+- the same image data as passthrough output for downstream visualization blocks
 - updated detection predictions with replaced `class`, `class_id`, and `confidence`
 - original bounding box fields preserved
 - original metadata preserved
@@ -66,6 +68,12 @@ service.py
 ```
 
 ## Inputs
+
+### `inputImage`
+
+Image data from the upstream image loader or previous image-processing block.
+
+The executor does not modify this image data. It is passed through to `outputImages` so NovaVision Suite can keep the component connected to an image-based flow and downstream visualization blocks can still receive the original image context.
 
 ### `inputDetections`
 
@@ -153,6 +161,10 @@ Default: `-1`.
 Only used when `FallbackClassName` is set. If the value is negative, the executor resolves it to `sys.maxsize`.
 
 ## Output
+
+### `outputImages`
+
+Image passthrough output. The value is copied from `inputImage`.
 
 ### `outputDetections`
 
@@ -342,8 +354,10 @@ Local Pydantic v2 may print warnings about v1-style `class Config` keys. The pac
 
 NovaVision canvas socket names are intentionally lower-camel-case:
 
+- `inputImage`
 - `inputDetections`
 - `inputData`
+- `outputImages`
 - `outputDetections`
 
 The package model uses NovaVision SDK base classes when they are available in the Suite runtime:
@@ -358,4 +372,6 @@ The package model uses NovaVision SDK base classes when they are available in th
 The input leaves use `field = "input"` rather than `hiddenInput`, because `hiddenInput` can keep the value available to forms while preventing the flow canvas from rendering connectable ports.
 
 Using names such as `ObjectDetectionPredictions` or custom names such as `inputClassificationPredictions` in the visible package model can prevent the Suite flow builder from rendering input/output ports.
+
+If NovaVision Suite shows `No images found for active executor`, keep the image passthrough sockets enabled. Image-processing packages commonly need at least one image input/output socket for the active executor even when the component's main logic works on detections and classifier outputs.
 

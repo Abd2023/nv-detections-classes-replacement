@@ -6,6 +6,7 @@ from src.models import (
     DetectionsClassesReplacementRequest,
     DetectionsClassesReplacementResponse,
     MatchingMode,
+    OutputImages,
     PackageModel,
     Predictions,
 )
@@ -44,10 +45,14 @@ def test_request_defaults_define_inputs_and_configs():
 
     assert request.name == "DetectionsClassesReplacementExecutor"
     assert request.type == "Request"
+    assert request.inputs.inputImage.name == "inputImage"
     assert request.inputs.inputDetections.name == "inputDetections"
     assert request.inputs.inputData.name == "inputData"
+    assert request.inputs.inputImage.field == "input"
     assert request.inputs.inputDetections.field == "input"
     assert request.inputs.inputData.field == "input"
+    assert request.inputs.input_image.value == []
+    assert request.inputs.input_image.type == "Images"
     assert request.inputs.object_detection_predictions.value == []
     assert request.inputs.object_detection_predictions.type == "Detections"
     assert request.inputs.classification_predictions.value == []
@@ -119,11 +124,16 @@ def test_response_outputs_predictions():
         metadata={"original_detection_id": "det-1"},
     )
     response = DetectionsClassesReplacementResponse(
-        outputs={"Predictions": Predictions(value=[detection])}
+        outputs={
+            "OutputImages": OutputImages(value=[{"uID": "image-1"}]),
+            "Predictions": Predictions(value=[detection]),
+        }
     )
 
     assert response.name == "DetectionsClassesReplacementExecutor"
     assert response.type == "Response"
+    assert response.outputs.outputImages.name == "outputImages"
+    assert response.outputs.output_images.value == [{"uID": "image-1"}]
     assert response.outputs.outputDetections.name == "outputDetections"
     assert len(response.outputs.predictions.value) == 1
     assert response.outputs.predictions.value[0].class_name == "truck"
@@ -139,8 +149,11 @@ def test_request_and_response_serialize_with_canvas_socket_names():
     assert sorted(request_payload["inputs"]) == [
         "inputData",
         "inputDetections",
+        "inputImage",
     ]
+    assert request_payload["inputs"]["inputImage"]["name"] == "inputImage"
     assert request_payload["inputs"]["inputDetections"]["name"] == "inputDetections"
     assert request_payload["inputs"]["inputData"]["name"] == "inputData"
-    assert sorted(response_payload["outputs"]) == ["outputDetections"]
+    assert sorted(response_payload["outputs"]) == ["outputDetections", "outputImages"]
+    assert response_payload["outputs"]["outputImages"]["name"] == "outputImages"
     assert response_payload["outputs"]["outputDetections"]["name"] == "outputDetections"

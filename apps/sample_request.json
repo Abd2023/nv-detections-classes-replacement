@@ -2,6 +2,9 @@
   "name": "DetectionsClassesReplacementExecutor",
   "type": "Request",
   "inputs": {
+    "inputImage": {
+      "value": []
+    },
     "inputDetections": {
       "value": [
         {
