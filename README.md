@@ -346,5 +346,16 @@ NovaVision canvas socket names are intentionally lower-camel-case:
 - `inputData`
 - `outputDetections`
 
+The package model uses NovaVision SDK base classes when they are available in the Suite runtime:
+
+- request model inherits `Request`
+- response model inherits `Response`
+- input group inherits `Inputs`
+- output group inherits `Outputs`
+- config group inherits `Configs`
+- package model inherits `Package`
+
+The input leaves use `field = "input"` rather than `hiddenInput`, because `hiddenInput` can keep the value available to forms while preventing the flow canvas from rendering connectable ports.
+
 Using names such as `ObjectDetectionPredictions` or custom names such as `inputClassificationPredictions` in the visible package model can prevent the Suite flow builder from rendering input/output ports.
 
