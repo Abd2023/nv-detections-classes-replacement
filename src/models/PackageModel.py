@@ -1,3 +1,3 @@
-from .package_model import PackageModel
+"""Compatibility module expected by NovaVision Suite package importer."""
 
-__all__ = ["PackageModel"]
+from .package_model import *  # noqa: F401,F403
