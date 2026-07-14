@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.executors.detections_classes_replacement_executor import (
+from .detections_classes_replacement_executor import (
     DetectionsClassesReplacementExecutor,
 )
 

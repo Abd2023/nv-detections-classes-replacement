@@ -5,7 +5,7 @@ import sys
 from typing import Any
 from uuid import uuid4
 
-from src.models import (
+from ..models import (
     DetectionPrediction,
     DetectionsClassesReplacementOutputs,
     DetectionsClassesReplacementRequest,
@@ -226,4 +226,3 @@ class DetectionsClassesReplacementExecutor:
         if hasattr(model, "model_dump"):
             return model.model_dump(by_alias=by_alias)
         return model.dict(by_alias=by_alias)
-

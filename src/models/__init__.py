@@ -1,4 +1,4 @@
-from src.models.package_model import (
+from .package_model import (
     AutoMatchingModeOption,
     ClassificationPredictions,
     ConfigExecutor,
@@ -41,4 +41,3 @@ __all__ = [
     "PositionalOnlyMatchingModeOption",
     "Predictions",
 ]
-
