@@ -93,6 +93,7 @@ class OutputImages(NovaVisionParam):
     name: Literal["outputImages"] = "outputImages"
     value: Any = Field(default_factory=list)
     type: Literal["Images"] = "Images"
+    field: Literal["data"] = "data"
 
     class Config:
         extra = "forbid"
@@ -105,6 +106,7 @@ class Predictions(NovaVisionParam):
     name: Literal["outputDetections"] = "outputDetections"
     value: List[DetectionPrediction] = Field(default_factory=list)
     type: Literal["Detections"] = "Detections"
+    field: Literal["data"] = "data"
 
     class Config:
         extra = "forbid"
@@ -199,6 +201,9 @@ class DetectionsClassesReplacementInputs(NovaVisionInputs):
     inputImage: InputImage = Field(default_factory=InputImage)
     inputDetections: ObjectDetectionPredictions = Field(default_factory=ObjectDetectionPredictions)
     inputData: ClassificationPredictions = Field(default_factory=ClassificationPredictions)
+    value: str = "Inputs"
+    type: Literal["object"] = "object"
+    field: Literal["input"] = "input"
 
     @root_validator(pre=True)
     def map_legacy_input_names(cls, values):
@@ -266,6 +271,9 @@ class DetectionsClassesReplacementConfigs(NovaVisionConfigs):
 class DetectionsClassesReplacementOutputs(NovaVisionOutputs):
     outputImages: OutputImages = Field(default_factory=OutputImages)
     outputDetections: Predictions = Field(default_factory=Predictions)
+    value: str = "Outputs"
+    type: Literal["object"] = "object"
+    field: Literal["output"] = "output"
 
     @root_validator(pre=True)
     def map_legacy_output_names(cls, values):
