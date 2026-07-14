@@ -30,7 +30,7 @@ def main() -> None:
 
     response_payload = run_locally(payload)
     print_class_replacement_summary(payload, response_payload)
-    print_json("Updated predictions", response_payload["outputs"]["Predictions"]["value"])
+    print_json("Updated detections", response_payload["outputs"]["outputDetections"]["value"])
 
 
 def load_sample_request() -> dict:
@@ -58,8 +58,8 @@ def post_to_api(payload: dict, api_url: str) -> dict:
 
 
 def print_class_replacement_summary(request_payload: dict, response_payload: dict) -> None:
-    input_detections = request_payload["inputs"]["ObjectDetectionPredictions"]["value"]
-    output_detections = response_payload["outputs"]["Predictions"]["value"]
+    input_detections = request_payload["inputs"]["inputDetections"]["value"]
+    output_detections = response_payload["outputs"]["outputDetections"]["value"]
 
     print("Detections Classes Replacement sample")
     print("-------------------------------------")
@@ -85,4 +85,3 @@ def model_to_dict(model: object, *, by_alias: bool = False) -> dict:
 
 if __name__ == "__main__":
     main()
-

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Literal, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
 
 class NovaVisionModel(BaseModel):
@@ -30,7 +30,7 @@ ClassificationPredictionValue = Union[Dict[str, Any], str, List[str]]
 
 
 class ObjectDetectionPredictions(NovaVisionModel):
-    name: Literal["ObjectDetectionPredictions"] = "ObjectDetectionPredictions"
+    name: Literal["inputDetections"] = "inputDetections"
     value: List[DetectionPrediction] = Field(default_factory=list)
     type: Literal["Detections"] = "Detections"
     field: Literal["hiddenInput"] = "hiddenInput"
@@ -40,9 +40,9 @@ class ObjectDetectionPredictions(NovaVisionModel):
 
 
 class ClassificationPredictions(NovaVisionModel):
-    name: Literal["ClassificationPredictions"] = "ClassificationPredictions"
+    name: Literal["inputClassificationPredictions"] = "inputClassificationPredictions"
     value: List[ClassificationPredictionValue] = Field(default_factory=list)
-    type: Literal["list"] = "list"
+    type: Literal["Detections"] = "Detections"
     field: Literal["hiddenInput"] = "hiddenInput"
 
     class Config:
@@ -50,7 +50,7 @@ class ClassificationPredictions(NovaVisionModel):
 
 
 class Predictions(NovaVisionModel):
-    name: Literal["Predictions"] = "Predictions"
+    name: Literal["outputDetections"] = "outputDetections"
     value: List[DetectionPrediction] = Field(default_factory=list)
     type: Literal["Detections"] = "Detections"
     field: Literal["hiddenInput"] = "hiddenInput"
@@ -124,14 +124,36 @@ class FallbackClassId(NovaVisionModel):
 
 
 class DetectionsClassesReplacementInputs(NovaVisionModel):
-    object_detection_predictions: ObjectDetectionPredictions = Field(
+    input_detections: ObjectDetectionPredictions = Field(
         default_factory=ObjectDetectionPredictions,
-        alias="ObjectDetectionPredictions",
+        alias="inputDetections",
     )
-    classification_predictions: ClassificationPredictions = Field(
+    input_classification_predictions: ClassificationPredictions = Field(
         default_factory=ClassificationPredictions,
-        alias="ClassificationPredictions",
+        alias="inputClassificationPredictions",
     )
+
+    @root_validator(pre=True)
+    def map_legacy_input_names(cls, values):
+        if not isinstance(values, dict):
+            return values
+
+        values = dict(values)
+        if "ObjectDetectionPredictions" in values and "inputDetections" not in values:
+            values["inputDetections"] = values["ObjectDetectionPredictions"]
+        if "ClassificationPredictions" in values and "inputClassificationPredictions" not in values:
+            values["inputClassificationPredictions"] = values["ClassificationPredictions"]
+        values.pop("ObjectDetectionPredictions", None)
+        values.pop("ClassificationPredictions", None)
+        return values
+
+    @property
+    def object_detection_predictions(self) -> ObjectDetectionPredictions:
+        return self.input_detections
+
+    @property
+    def classification_predictions(self) -> ClassificationPredictions:
+        return self.input_classification_predictions
 
 
 class DetectionsClassesReplacementConfigs(NovaVisionModel):
@@ -147,7 +169,22 @@ class DetectionsClassesReplacementConfigs(NovaVisionModel):
 
 
 class DetectionsClassesReplacementOutputs(NovaVisionModel):
-    predictions: Predictions = Field(default_factory=Predictions, alias="Predictions")
+    output_detections: Predictions = Field(default_factory=Predictions, alias="outputDetections")
+
+    @root_validator(pre=True)
+    def map_legacy_output_names(cls, values):
+        if not isinstance(values, dict):
+            return values
+
+        values = dict(values)
+        if "Predictions" in values and "outputDetections" not in values:
+            values["outputDetections"] = values["Predictions"]
+        values.pop("Predictions", None)
+        return values
+
+    @property
+    def predictions(self) -> Predictions:
+        return self.output_detections
 
 
 class DetectionsClassesReplacementRequest(NovaVisionModel):
@@ -217,4 +254,3 @@ class PackageModel(NovaVisionModel):
 
     class Config:
         title = "Detections Classes Replacement"
-
