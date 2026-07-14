@@ -46,6 +46,8 @@ def test_request_defaults_define_inputs_and_configs():
     assert request.type == "Request"
     assert request.inputs.inputDetections.name == "inputDetections"
     assert request.inputs.inputData.name == "inputData"
+    assert request.inputs.inputDetections.field == "input"
+    assert request.inputs.inputData.field == "input"
     assert request.inputs.object_detection_predictions.value == []
     assert request.inputs.object_detection_predictions.type == "Detections"
     assert request.inputs.classification_predictions.value == []
