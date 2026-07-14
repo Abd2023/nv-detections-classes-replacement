@@ -40,7 +40,7 @@ class ObjectDetectionPredictions(NovaVisionModel):
 
 
 class ClassificationPredictions(NovaVisionModel):
-    name: Literal["inputClassificationPredictions"] = "inputClassificationPredictions"
+    name: Literal["inputData"] = "inputData"
     value: List[ClassificationPredictionValue] = Field(default_factory=list)
     type: Literal["Detections"] = "Detections"
     field: Literal["hiddenInput"] = "hiddenInput"
@@ -124,14 +124,8 @@ class FallbackClassId(NovaVisionModel):
 
 
 class DetectionsClassesReplacementInputs(NovaVisionModel):
-    input_detections: ObjectDetectionPredictions = Field(
-        default_factory=ObjectDetectionPredictions,
-        alias="inputDetections",
-    )
-    input_classification_predictions: ClassificationPredictions = Field(
-        default_factory=ClassificationPredictions,
-        alias="inputClassificationPredictions",
-    )
+    inputDetections: ObjectDetectionPredictions = Field(default_factory=ObjectDetectionPredictions)
+    inputData: ClassificationPredictions = Field(default_factory=ClassificationPredictions)
 
     @root_validator(pre=True)
     def map_legacy_input_names(cls, values):
@@ -141,19 +135,30 @@ class DetectionsClassesReplacementInputs(NovaVisionModel):
         values = dict(values)
         if "ObjectDetectionPredictions" in values and "inputDetections" not in values:
             values["inputDetections"] = values["ObjectDetectionPredictions"]
-        if "ClassificationPredictions" in values and "inputClassificationPredictions" not in values:
-            values["inputClassificationPredictions"] = values["ClassificationPredictions"]
+        if "ClassificationPredictions" in values and "inputData" not in values:
+            values["inputData"] = values["ClassificationPredictions"]
+        if "inputClassificationPredictions" in values and "inputData" not in values:
+            values["inputData"] = values["inputClassificationPredictions"]
         values.pop("ObjectDetectionPredictions", None)
         values.pop("ClassificationPredictions", None)
+        values.pop("inputClassificationPredictions", None)
         return values
 
     @property
     def object_detection_predictions(self) -> ObjectDetectionPredictions:
-        return self.input_detections
+        return self.inputDetections
 
     @property
     def classification_predictions(self) -> ClassificationPredictions:
-        return self.input_classification_predictions
+        return self.inputData
+
+    @property
+    def input_detections(self) -> ObjectDetectionPredictions:
+        return self.inputDetections
+
+    @property
+    def input_classification_predictions(self) -> ClassificationPredictions:
+        return self.inputData
 
 
 class DetectionsClassesReplacementConfigs(NovaVisionModel):
@@ -169,7 +174,7 @@ class DetectionsClassesReplacementConfigs(NovaVisionModel):
 
 
 class DetectionsClassesReplacementOutputs(NovaVisionModel):
-    output_detections: Predictions = Field(default_factory=Predictions, alias="outputDetections")
+    outputDetections: Predictions = Field(default_factory=Predictions)
 
     @root_validator(pre=True)
     def map_legacy_output_names(cls, values):
@@ -184,7 +189,11 @@ class DetectionsClassesReplacementOutputs(NovaVisionModel):
 
     @property
     def predictions(self) -> Predictions:
-        return self.output_detections
+        return self.outputDetections
+
+    @property
+    def output_detections(self) -> Predictions:
+        return self.outputDetections
 
 
 class DetectionsClassesReplacementRequest(NovaVisionModel):

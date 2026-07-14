@@ -14,7 +14,7 @@ def run_executor(*, detections, classifications, configs=None):
     request = DetectionsClassesReplacementRequest(
         inputs={
             "inputDetections": {"value": detections},
-            "inputClassificationPredictions": {"value": classifications},
+            "inputData": {"value": classifications},
         },
         configs=configs or {},
     )

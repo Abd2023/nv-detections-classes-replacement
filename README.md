@@ -89,9 +89,9 @@ Expected detection fields:
 }
 ```
 
-### `inputClassificationPredictions`
+### `inputData`
 
-List of classification results. It is exposed as a `Detections` socket so it can be connected on the NovaVision canvas. The executor supports:
+List of classification results from the classifier stage. It uses the standard NovaVision `inputData` socket name so it can be connected on the flow canvas. The executor supports:
 
 - dictionaries linked with `parent_id`
 - single-label classification dictionaries with `top`
@@ -343,8 +343,8 @@ Local Pydantic v2 may print warnings about v1-style `class Config` keys. The pac
 NovaVision canvas socket names are intentionally lower-camel-case:
 
 - `inputDetections`
-- `inputClassificationPredictions`
+- `inputData`
 - `outputDetections`
 
-Using names such as `ObjectDetectionPredictions` in the visible package model can prevent the Suite flow builder from rendering input/output ports.
+Using names such as `ObjectDetectionPredictions` or custom names such as `inputClassificationPredictions` in the visible package model can prevent the Suite flow builder from rendering input/output ports.
 
